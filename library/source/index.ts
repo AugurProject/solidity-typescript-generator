@@ -125,6 +125,27 @@ export const eventDescriptions: { [signatureHash: string]: EventDescription } = 
 ${Array.of(...eventDescriptions.values()).map(x => `\t${x}`).join(',\n')}
 }
 
+class ContractError extends Error {
+  abi:string;
+  parameters: string;
+
+  constructor(abi:AbiFunction, parameters:Array<any>,  ...args:Array<any>) {
+    super(...args);
+
+    this.setAbi(abi);
+    this.setParameters(parameters);
+
+    Error.captureStackTrace(this, ContractError);
+  }
+
+  setAbi(abi: AbiFunction) {
+    this.abi = JSON.stringify(abi);
+  }
+
+  setParameters(parameters: Array<any>) {
+    this.parameters = JSON.stringify(parameters);
+  }
+}
 
 export interface Dependencies<TBigNumber> {
 	// TODO: get rid of some of these dependencies in favor of baked in solutions
@@ -154,7 +175,7 @@ export class Contract<TBigNumber> {
 		const data = this.encodeMethod(abi, parameters)
 		const transaction = Object.assign({ to: this.address, data: data }, attachedEth ? { value: attachedEth } : {}, from ? { from: from } : {})
 		const result = await this.dependencies.call(transaction)
-		if (result === '0x') throw new Error(\`Call returned '0x' indicating failure.\`)
+		if (result === '0x') throw new ContractError(abi, parameters, \`Call returned '0x' indicating failure.\`)
 		return this.dependencies.decodeParams(abi.outputs, result)
 	}
 
@@ -164,7 +185,7 @@ export class Contract<TBigNumber> {
 		const transaction = Object.assign({ to: this.address, data: data }, attachedEth ? { value: attachedEth } : {}, from ? { from: from } : {})
 		const transactionReceipt = await this.dependencies.submitTransaction(transaction)
 		if (transactionReceipt.status != 1) {
-			throw new Error(\`Tx \${txName} failed: \${transactionReceipt}\`)
+			throw new ContractError(abi, parameters, \`Tx \${txName} failed: \${transactionReceipt}\`)
 		}
 		return this.decodeEvents(transactionReceipt.logs)
 	}
