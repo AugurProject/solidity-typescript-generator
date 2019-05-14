@@ -138,11 +138,11 @@ class ContractError extends Error {
     Error.captureStackTrace(this, ContractError);
   }
 
-  setAbi(abi: AbiFunction) {
+  setAbi = (abi: AbiFunction) => {
     this.abi = JSON.stringify(abi);
   }
 
-  setParameters(parameters: Array<any>) {
+  setParameters = (parameters: Array<any>) => {
     this.parameters = JSON.stringify(parameters);
   }
 }
@@ -154,6 +154,7 @@ export interface Dependencies<TBigNumber> {
 	decodeParams(abi: Array<AbiParameter>, encoded: string): Array<any>
 	getDefaultAddress(): Promise<string | undefined>
 	call(transaction: Transaction<TBigNumber>): Promise<string>
+	estimateGas(transaction: Transaction<TBigNumber>): Promise<TBigNumber>
 	submitTransaction(transaction: Transaction<TBigNumber>): Promise<TransactionReceipt>
 }
 
@@ -188,6 +189,14 @@ export class Contract<TBigNumber> {
 			throw new ContractError(abi, parameters, \`Tx \${txName} failed: \${transactionReceipt}\`)
 		}
 		return this.decodeEvents(transactionReceipt.logs)
+	}
+
+	protected async estimateGas(abi: AbiFunction, parameters: Array<any>, txName: string, sender?: string, attachedEth?: TBigNumber): Promise<TBigNumber> {
+		const from = sender || await this.dependencies.getDefaultAddress()
+		const data = this.encodeMethod(abi, parameters)
+		const transaction = Object.assign({ to: this.address, data: data }, attachedEth ? { value: attachedEth } : {}, from ? { from: from } : {})
+	
+		return this.dependencies.estimateGas(transaction);	
 	}
 
 	private encodeMethod(abi: AbiFunction, parameters: Array<any>): string {
@@ -311,6 +320,12 @@ function remoteMethodTemplate(abiFunction: AbiFunction, errorContext: { contract
 		options = options || {}
 		const abi: AbiFunction = ${JSON.stringify(abiFunction)}
 		return await this.remoteCall(abi, [${argNames}], '${abiFunction.name}', options.sender${abiFunction.payable ? ', options.attachedEth' : ''})
+	}
+	
+	public ${abiFunction.name}_estimateGas = async (${params}options?: ${options}): Promise<TBigNumber> => {
+		options = options || {}
+		const abi: AbiFunction = ${JSON.stringify(abiFunction)}
+		return await this.estimateGas(abi, [${argNames}], '${abiFunction.name}', options.sender${abiFunction.payable ? ', options.attachedEth' : ''})
 	}`
 }
 
