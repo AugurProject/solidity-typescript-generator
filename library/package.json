@@ -1,6 +1,6 @@
 {
   "name": "@augurproject/solidity-typescript-generator",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Takes in a solidity file and generates a set of TypeScript classes for interacting with the contract.",
   "main": "output/index.js",
   "scripts": {
