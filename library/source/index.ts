@@ -1,6 +1,6 @@
 import { keccak256 } from 'js-sha3'
 
-type Primitive = 'uint8' | 'uint64' | 'uint256' | 'bool' | 'string' | 'address' | 'bytes4' | 'bytes20' | 'bytes32' | 'bytes' | 'bytes[]' | 'int256' | 'tuple' | 'address[]' | 'uint8[]' | 'uint256[]' | 'int256[]' | 'bytes32[]' | 'tuple[]'
+type Primitive = 'uint8' | 'uint64' | 'uint128' | 'uint256' | 'bool' | 'string' | 'address' | 'bytes4' | 'bytes20' | 'bytes32' | 'bytes' | 'bytes[]' | 'int256' | 'tuple' | 'address[]' | 'uint8[]' | 'uint256[]' | 'int256[]' | 'bytes32[]' | 'tuple[]' | 'bool[]'
 
 interface AbiParameter {
 	name: string,
@@ -356,6 +356,7 @@ function toTsTypeString(abiParameter: AbiParameter, errorContext: { contractName
 	switch(abiParameter.type) {
 		case 'uint8':
 		case 'uint64':
+		case 'uint128':
 		case 'uint256':
 		case 'int256': {
 			return 'TBigNumber'
@@ -370,6 +371,9 @@ function toTsTypeString(abiParameter: AbiParameter, errorContext: { contractName
 		}
 		case 'bool': {
 			return 'boolean'
+		}
+		case 'bool[]': {
+			return 'Array<boolean>'
 		}
 		case 'tuple': {
 			return `{ ${abiParameter.components!.map(component => `${component.name}: ${toTsTypeString(component, errorContext)}`).join(', ')} }`
