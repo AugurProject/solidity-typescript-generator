@@ -5,6 +5,7 @@ type Primitive = 'uint8' | 'uint64' | 'uint256' | 'bool' | 'string' | 'address' 
 interface AbiParameter {
 	name: string,
 	type: Primitive,
+	internalType: any;
 	components?: Array<AbiParameter>
 }
 
@@ -370,6 +371,9 @@ function toTsTypeString(abiParameter: AbiParameter, errorContext: { contractName
 		}
 		case 'bool': {
 			return 'boolean'
+		}
+		case 'bool[]': {
+			return 'Array<boolean>'
 		}
 		case 'tuple': {
 			return `{ ${abiParameter.components!.map(component => `${component.name}: ${toTsTypeString(component, errorContext)}`).join(', ')} }`
