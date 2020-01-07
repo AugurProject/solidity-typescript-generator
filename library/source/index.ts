@@ -1,6 +1,6 @@
 import { keccak256 } from 'js-sha3'
 
-type Primitive = 'uint8' | 'uint64' | 'uint256' | 'bool' | 'string' | 'address' | 'bytes4' | 'bytes20' | 'bytes32' | 'bytes' | 'bytes[]' | 'int256' | 'tuple' | 'address[]' | 'uint8[]' | 'uint256[]' | 'int256[]' | 'bytes32[]' | 'tuple[]'
+type Primitive = 'uint8' | 'uint64' | 'uint256' | 'bool' | 'string' | 'address' | 'bytes4' | 'bytes20' | 'bytes32' | 'bytes' | 'bytes[]' | 'int256' | 'tuple' | 'address[]' | 'uint8[]' | 'uint256[]' | 'int256[]' | 'bytes32[]' | 'tuple[]' | 'bool[]'
 
 interface AbiParameter {
 	name: string,
