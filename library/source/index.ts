@@ -5,7 +5,7 @@ type Primitive = 'uint8' | 'uint64' | 'uint256' | 'bool' | 'string' | 'address' 
 interface AbiParameter {
 	name: string,
 	type: Primitive,
-	internalType: any;
+	internalType: any,
 	components?: Array<AbiParameter>
 }
 
