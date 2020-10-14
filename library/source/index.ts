@@ -197,8 +197,8 @@ export class Contract<TBigNumber> {
 		const from = sender || await this.dependencies.getDefaultAddress()
 		const data = this.encodeMethod(abi, parameters)
 		const transaction = Object.assign({ to: this.address, data: data }, attachedEth ? { value: attachedEth } : {}, from ? { from: from } : {})
-	
-		return this.dependencies.estimateGas(transaction);	
+
+		return this.dependencies.estimateGas(transaction);
 	}
 
 	private encodeMethod(abi: AbiFunction, parameters: Array<any>): string {
@@ -323,7 +323,7 @@ function remoteMethodTemplate(abiFunction: AbiFunction, errorContext: { contract
 		const abi: AbiFunction = ${JSON.stringify(abiFunction)}
 		return await this.remoteCall(abi, [${argNames}], '${abiFunction.name}', options.sender${abiFunction.payable ? ', options.attachedEth' : ''})
 	}
-	
+
 	public ${abiFunction.name}_estimateGas = async (${params}options?: ${options}): Promise<TBigNumber> => {
 		options = options || {}
 		const abi: AbiFunction = ${JSON.stringify(abiFunction)}
@@ -358,6 +358,7 @@ function toTsTypeString(abiParameter: AbiParameter, errorContext: { contractName
 	switch(abiParameter.type) {
 		case 'uint8':
 		case 'uint32':
+			return 'number';
 		case 'uint64':
 		case 'uint112':
 		case 'uint224':
@@ -386,7 +387,9 @@ function toTsTypeString(abiParameter: AbiParameter, errorContext: { contractName
 		case 'address[]': {
 			return 'Array<string>'
 		}
-		case 'uint8[]':
+		case 'uint8[]': {
+			return 'Array<number>'
+		}
 		case 'uint256[]':
 		case 'int256[]': {
 			return 'Array<TBigNumber>'
